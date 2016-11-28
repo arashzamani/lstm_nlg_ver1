@@ -15,7 +15,7 @@ import math
 import nltk.data
 import language_parser.word as w
 
-f = codecs.open("/home/arash/Downloads/bbc.txt", 'r', encoding='utf8')
+f = codecs.open("/home/arash/Downloads/bbc_test.txt", 'r', encoding='utf8')
 text = f.read()
 #text = open(path).read()
 print('corpus length:', len(text))
@@ -36,10 +36,10 @@ for i in range(0, len(words), 1):
 print ("unique words: ", len(unique_words))
 thefile = codecs.open("/home/arash/Downloads/unique_words.txt", 'w', encoding='utf8')
 
-for keys in unique_words.keys():
-  thefile.write("%s\t%s\n" % keys % unique_words[keys])
-
-thefile.close()
+# for keys in unique_words.keys():
+#   thefile.write("%s\t%s\n" % keys % unique_words[keys])
+#
+# thefile.close()
 
 #in maximum len bayady miangin tedad kalamat jomleh bashe
 maxlen = 67

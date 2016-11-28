@@ -74,6 +74,8 @@ def remove_bad_chars_from_word(words):
                 words[i] = words[i][:-1]
     return words
 
+
+
 # f = codecs.open("/home/arash/Downloads/bbc.txt", 'r', encoding='utf8')
 # text = f.read()
 #
