@@ -4,7 +4,7 @@ from hazm import *
 
 # def _init(text):
 
-f = codecs.open("/home/arash/Downloads/bbc_test.txt", 'r', encoding='utf8')
+f = codecs.open("/home/arash/Downloads/test.txt", 'r', encoding='utf8')
 text = f.read()
 sents = sent_tokenize(text)
 print(len(sents))
