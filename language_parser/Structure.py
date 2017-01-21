@@ -14,7 +14,7 @@ class Structure:
     sentences = list()
     sentences_obj = list()
     tagged_sentences = list()  # replace tags instead of any word in real sentence
-    words_in_sentences = list()
+    pure_words_in_sentences = list()
     tags = dict()
     sentence_tags = ""  # for inner usage
     chunks = dict()
@@ -37,11 +37,18 @@ class Structure:
         self.sentences_obj = [Sentence.Sentence(sentence) for sentence in self.sentences]
         print "number of sentences", len(self.sentences_obj)
 
-    def prepare_list_of_words_in_sentences(self):
-        if len(self.words_in_sentences) == 0:
-            stop_list = wordC.Word.get__stop_words()
-            self.words_in_sentences = [[word for word in word_tokenize(sentence) if word not in w.specials] for sentence in self.sentences]
-        return self.words_in_sentences
+    # def prepare_list_of_words_in_sentences(self):
+    #     if len(self.words_in_sentences) == 0:
+    #         stop_list = wordC.Word.get__stop_words()
+    #         self.words_in_sentences = [[word for word in word_tokenize(sentence) if word not in w.specials] for sentence in self.sentences]
+    #     return self.words_in_sentences
+
+    def prepare_pure_list_of_words(self):
+        temp = list()
+        for sentence in self.sentences_obj:
+            temp += sentence.words
+        self.pure_words_in_sentences = temp
+        return self.pure_words_in_sentences
 
     def generate_tags_dict(self):
         tagged_temp_list = list()
