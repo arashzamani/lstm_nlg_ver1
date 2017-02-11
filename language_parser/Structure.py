@@ -16,6 +16,7 @@ class Structure:
     tagged_sentences = list()  # replace tags instead of any word in real sentence
     pure_words_in_sentences = list()
     tags = dict()
+    words_in_sentences = list()
     sentence_tags = ""  # for inner usage
     chunks = dict()
 
@@ -23,8 +24,8 @@ class Structure:
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)
         logging.log(logging.INFO, "Structure initialized")
         self.text = text
-        self.tagger = POSTagger(model='/home/arash/PycharmProjects/lstm_nlg_ver1.2/resources/postagger.model')
-        self.chunker = Chunker(model='/home/arash/PycharmProjects/lstm_nlg_ver1.2/resources/chunker.model')
+        self.tagger = POSTagger(model='/home/arash/PycharmProjects/lstm_nlg_ver1/resources/postagger.model')
+        self.chunker = Chunker(model='/home/arash/PycharmProjects/lstm_nlg_ver1/resources/chunker.model')
         self.prepare_sentences()
 
     # def __iter__(self):
@@ -37,11 +38,11 @@ class Structure:
         self.sentences_obj = [Sentence.Sentence(sentence) for sentence in self.sentences]
         print "number of sentences", len(self.sentences_obj)
 
-    # def prepare_list_of_words_in_sentences(self):
-    #     if len(self.words_in_sentences) == 0:
-    #         stop_list = wordC.Word.get__stop_words()
-    #         self.words_in_sentences = [[word for word in word_tokenize(sentence) if word not in w.specials] for sentence in self.sentences]
-    #     return self.words_in_sentences
+    def prepare_list_of_words_in_sentences(self):
+        if len(self.words_in_sentences) == 0:
+            # stop_list = wordC.Word.get__stop_words()
+            self.words_in_sentences = [[word for word in word_tokenize(sentence) if word not in w.specials] for sentence in self.sentences]
+        return self.words_in_sentences
 
     def prepare_pure_list_of_words(self):
         temp = list()
@@ -58,10 +59,10 @@ class Structure:
             for part in temp_tags:
                 tagged_sentence.append(part[1])
                 if part[1] in self.tags.keys():
-                    self.tags[part[1]].append(part[0])
+                    self.tags[part[1]].add(part[0])
                 else:
-                    values = list()
-                    values.append(part[0])
+                    values = set()
+                    values.add(part[0])
                     self.tags[part[1]] = values
             self.tagged_sentences.append(tagged_sentence)
             tagged_temp_list += tagged_sentence
