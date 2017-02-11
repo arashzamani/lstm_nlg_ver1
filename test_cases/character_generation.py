@@ -85,52 +85,51 @@ print X.shape
 print '--------------------'
 print type(y)
 print y.shape
-#
-# def sample(preds, temperature=1.0):
-#     # helper function to sample an index from a probability array
-#     # preds = np.asarray(preds).astype('float64')
-#
-#     id_probs = sorted(enumerate(preds), key=lambda x: x[1], reverse=True)[0:5]
-#     ids = [v[0] for v in id_probs]
-#     probs = numpy.array([v[1] for v in id_probs]) / sum([v[1] for v in id_probs])
-#
-#     return numpy.random.choice(ids, p=probs)
-#
-#     '''
-#     return numpy.argmax(preds)
-#     preds = numpy.log(preds) / temperature
-#     exp_preds = numpy.exp(preds)
-#     preds = exp_preds / numpy.sum(exp_preds)
-#     probas = numpy.random.multinomial(1, preds, 1)
-#     return numpy.random.randint(0, len(preds) - 1)
-#     return numpy.argmax(probas)
-#     '''
-#
-#
-# for rn in range(400):
-#     print rn
-#     model.fit(X, y, nb_epoch=5, batch_size=64)  # , callbacks=callbacks_list)
-#     # pick a random seed
-#     start = numpy.random.randint(0, len(dataX) - 1)
-#     pattern = dataX[start]
-#     print "Seed:"
-#     print "\"", ''.join([int_to_char[value] for value in pattern]), "\""
-#     rs = []
-#     for i in range(300):
-#         x = numpy.reshape(pattern, (1, len(pattern), 1))
-#         x = x / float(n_vocab)
-#         prediction = model.predict(x, verbose=0)
-#
-#         # index = numpy.argmax(prediction[0])
-#
-#         index = sample(prediction[0], 2.0)
-#         result = int_to_char[index]
-#         seq_in = [int_to_char[value] for value in pattern]
-#         sys.stdout.write(result)
-#         rs.append(index)
-#         pattern.append(index)
-#         pattern = pattern[1:len(pattern)]
-#     print "\nDone."
-    # print rs
 
 
+def sample(preds, temperature=1.0):
+    # helper function to sample an index from a probability array
+    # preds = np.asarray(preds).astype('float64')
+
+    id_probs = sorted(enumerate(preds), key=lambda x: x[1], reverse=True)[0:5]
+    ids = [v[0] for v in id_probs]
+    probs = numpy.array([v[1] for v in id_probs]) / sum([v[1] for v in id_probs])
+
+    return numpy.random.choice(ids, p=probs)
+
+    '''
+    return numpy.argmax(preds)
+    preds = numpy.log(preds) / temperature
+    exp_preds = numpy.exp(preds)
+    preds = exp_preds / numpy.sum(exp_preds)
+    probas = numpy.random.multinomial(1, preds, 1)
+    return numpy.random.randint(0, len(preds) - 1)
+    return numpy.argmax(probas)
+    '''
+
+
+for rn in range(400):
+    print rn
+    model.fit(X, y, nb_epoch=5, batch_size=64)  # , callbacks=callbacks_list)
+    # pick a random seed
+    start = numpy.random.randint(0, len(dataX) - 1)
+    pattern = dataX[start]
+    print "Seed:"
+    print "\"", ''.join([int_to_char[value] for value in pattern]), "\""
+    rs = []
+    for i in range(300):
+        x = numpy.reshape(pattern, (1, len(pattern), 1))
+        x = x / float(n_vocab)
+        prediction = model.predict(x, verbose=0)
+
+        # index = numpy.argmax(prediction[0])
+
+        index = sample(prediction[0], 2.0)
+        result = int_to_char[index]
+        seq_in = [int_to_char[value] for value in pattern]
+        sys.stdout.write(result)
+        rs.append(index)
+        pattern.append(index)
+        pattern = pattern[1:len(pattern)]
+    print "\nDone."
+    print rs

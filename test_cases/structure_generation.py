@@ -26,10 +26,12 @@ class StructureModel:
         vocabulary = sorted(list(set(word_list)))
         vocab_lenght = len(vocabulary)
         struct.generate_tags_dict()
-        # tags modeling
-        tag_dict, tag_model = StructureModel.tags_model(struct, seq_length)
         # semantic modeling
         semantic = StructureModel.semantic_model(struct)
+
+        # tags modeling
+        tag_dict, tag_model = StructureModel.tags_model(struct, seq_length)
+
 
         #data prepration
         #tags data
@@ -51,75 +53,7 @@ class StructureModel:
 
         # model.fit([tagsX, wordsX], wordsY, batch_size=300, nb_epoch=2)
 
-        for rn in range(10):
-            print rn
-            model.fit([tagsX, wordsX], wordsY, nb_epoch=5, batch_size=64)  # , callbacks=callbacks_list)
-            # pick a random seed
-            start = numpy.random.randint(0, nb_patterns - 1)
-            word_pattern = words_array[start]
-            tag_pattern = tags_array[start]
-            print "Seed:"
-            print "\"", ' '.join([int_to_words[value] for value in word_pattern]), "\""
-            # print "\"", ' '.join([int_to_tags[value] for value in tag_pattern]), "\""
-            rs = []
-            for i in range(300):
-                word_x = numpy.reshape(word_pattern, (1, len(word_pattern), 1))
-                word_x = word_x / float(vocab_lenght)
-                tag_x = numpy.reshape(tag_pattern,(1,len(tag_pattern),1))
-                tag_x = tag_x / float(len(tag_dict))
-                prediction = model.predict([tag_x, word_x], verbose=0)
 
-                # index = numpy.argmax(prediction[0])
-
-                index = StructureModel.sample(prediction[0], 2.0)
-                result = int_to_words[index]
-                seq_in = [int_to_words[value] for value in word_pattern]
-                sys.stdout.write(result)
-                sys.stdout.write(" ")
-                rs.append(index)
-                word_pattern.append(index)
-                tag_pattern.append(index)
-                word_pattern = word_pattern[1:len(word_pattern)]
-                tag_pattern = tag_pattern[1:len(tag_pattern)]
-            print "\nDone."
-    @classmethod
-    def combine_model(cls, structure, tag_model, word_model, seq_length, vocab_length):
-        model = Sequential()
-        model.add(Merge([tag_model, word_model], mode='concat', concat_axis=-1))
-
-        model.add(GRU(16, return_sequences=False))
-        model.add(Dense(vocab_length, activation='softmax'))
-        model.add(Dropout(0.02))
-
-        model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
-
-        return model
-
-    @classmethod
-    def data_preparation(cls, words_set, seq_length, words):
-        temp_to_int = dict((c, i) for i, c in enumerate(words_set))
-        int_to_temp = dict((i, c) for i, c in enumerate(words_set))
-        dataX = []
-        dataY = []
-        n_words_in_text = len(words)
-
-        for i in range(0, n_words_in_text - seq_length, 1):
-            seq_in = words[i:i + seq_length]
-            seq_out = words[i + seq_length]
-            dataX.append([temp_to_int[pair] for pair in seq_in])
-            dataY.append(temp_to_int[seq_out])
-        n_patterns = len(dataX)
-
-        # reshape X to be [samples, time steps, features]
-        X = numpy.reshape(dataX, (n_patterns, seq_length, 1))
-        print X.shape
-        # one hot encode the output variable
-        # normalize
-        X = X / float(len(words_set))
-        # y = numpy.reshape(dataY, (n_patterns, ))
-        y = np_utils.to_categorical(dataY)
-        print y.shape
-        return dataX, temp_to_int, int_to_temp, X, y
 
     @classmethod
     def word_model(cls, structure, seq_length, vacab_length, nb_pattern):
@@ -246,60 +180,3 @@ class StructureModel:
 
         return semantic_model
 
-    @classmethod
-    def word_tag_model(cls, structure, seq_length):
-        word_list = structure.prepare_pure_list_of_words()
-        tag_list = structure.tagged_text.split()
-        tag_with_word = zip(tag_list, word_list)
-        unique_paired = sorted(list(set(tag_with_word)))
-        paired_to_int = dict((c, i) for i, c in enumerate(unique_paired))
-        int_to_paired = dict((i, c) for i, c in enumerate(unique_paired))
-        dataX = []
-        dataY = []
-        n_tags_in_text = len(tag_list)
-
-        for i in range(0, n_tags_in_text - seq_length, 1):
-            seq_in = zip(tag_list[i:i + seq_length], word_list[i:i + seq_length])
-            seq_out = (tag_list[i + seq_length], word_list[i + seq_length])
-            dataX.append([paired_to_int[pair] for pair in seq_in])
-            dataY.append(paired_to_int[seq_out])
-        n_patterns = len(dataX)
-
-        unique_paired_len = len(unique_paired)
-        # reshape X to be [samples, time steps, features]
-        X = numpy.reshape(dataX, (n_patterns, seq_length, 2))
-        # normalize
-        X = X / float(unique_paired_len)
-        # one hot encode the output variable
-        y = np_utils.to_categorical(dataY)
-        # define the LSTM model
-        model = Sequential()
-        nn = 16
-
-        model.add(GRU(nn * 4, return_sequences=True, input_shape=(X.shape[1], X.shape[2])))
-        model.add(Dropout(0.02))
-
-        model.add(GRU(nn * 3, return_sequences=True))
-        model.add(Dropout(0.02))
-
-        model.add(GRU(nn * 2, return_sequences=True))
-        model.add(Dropout(0.02))
-
-        model.add(GRU(nn * 1, return_sequences=False))
-        model.add(Dropout(0.02))
-
-        model.add(Dense(y.shape[1], activation='softmax'))
-        model.add(Dropout(0.02))
-
-
-
-
-        # tags_input = Input(shape=(tags_len,), dtype='int32', name='tags_input')
-        #
-        # x = Embedding(output_dim=tags_len, input_dim=tags_len, input_length=100)(tags_input)
-        #
-        # x = Dense(tags_len * 2, activation='relu')(x)
-        # x = Dense(tags_len * 2, activation='relu')(x)
-        # x = Dense(tags_len * 2, activation='relu')(x)
-        #
-        # tags_output = Dense(1, activation='sigmoid', name='main_output')(x)

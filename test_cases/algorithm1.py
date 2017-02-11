@@ -1,5 +1,6 @@
 import collections
 
+import operator
 import numpy
 import sys
 from keras.layers import Dense
@@ -10,6 +11,7 @@ from keras.utils import np_utils
 
 import language_parser.SemanticVector as sv
 import language_parser.Structure as structure
+import language_parser.Word as w
 
 
 class StructureModel:
@@ -29,9 +31,6 @@ class StructureModel:
         # tags modeling
         tag_model = StructureModel.tags_model(struct, seq_length, semantic)
 
-
-
-
     @classmethod
     def tags_model(cls, structure, seq_length, word2vec):
         total = 0
@@ -44,18 +43,26 @@ class StructureModel:
         tags_dict = collections.OrderedDict(sorted(structure.tags.items()))
         tags_len = len(tags_dict)
 
+        word_list = structure.prepare_pure_list_of_words()
+        vocabulary = sorted(list(set(word_list)))
+
+        word_to_int = dict((c, i) for i, c in enumerate(vocabulary))
+        int_to_word = dict((i, c) for i, c in enumerate(vocabulary))
         tag_to_int = dict((c, i) for i, c in enumerate(tags_dict))
         int_to_tag = dict((i, c) for i, c in enumerate(tags_dict))
 
         dataX = []
+        wordsX = []
         dataY = []
         tagged_text = structure.tagged_text.split()
         n_tags_in_text = len(tagged_text)
 
         for i in range(0, n_tags_in_text - seq_length, 1):
             seq_in = tagged_text[i:i + seq_length]
+            word_in = word_list[i:i + seq_length]
             seq_out = tagged_text[i + seq_length]
             dataX.append([tag_to_int[char] for char in seq_in])
+            wordsX.append([word_to_int[word] for word in word_in])
             dataY.append(tag_to_int[seq_out])
         n_patterns = len(dataX)
 
@@ -65,6 +72,8 @@ class StructureModel:
         X = X / float(tags_len)
         # one hot encode the output variable
         y = np_utils.to_categorical(dataY)
+
+        print y.shape
         # define the LSTM model
         tag_model = Sequential()
         nn = 16
@@ -81,40 +90,58 @@ class StructureModel:
         tag_model.add(GRU(nn * 1, return_sequences=False))
         tag_model.add(Dropout(0.02))
 
-        tag_model.add(Dense(y.shape[1], activation='relu'))
+        tag_model.add(Dense(y.shape[1], activation='sigmoid'))
         tag_model.add(Dropout(0.02))
-
 
         # # load the network weights
         tag_model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
         # testing
-        for rn in range(10):
+        for rn in range(1):
             print rn
-            tag_model.fit(X, y, nb_epoch=5, batch_size=64)  # , callbacks=callbacks_list)
+            tag_model.fit(X, y, nb_epoch=1, batch_size=512)  # , callbacks=callbacks_list)
             # pick a random seed
             start = numpy.random.randint(0, len(dataX) - 1)
             pattern = dataX[start]
+            word_pattern = wordsX[start]
             print "Seed:"
-            print "\"", ' '.join([int_to_tag[value] for value in pattern]), "\""
+            # print "\"", ' '.join([int_to_tag[value] for value in pattern]), "\""
+            print "\"", ' '.join([int_to_word[value] for value in word_pattern]), "\""
             rs = []
-            for i in range(300):
+            for i in range(1):
                 x = numpy.reshape(pattern, (1, len(pattern), 1))
                 x = x / float(tags_len)
                 prediction = tag_model.predict(x, verbose=0)
 
                 # index = numpy.argmax(prediction[0])
-
+                print prediction
+                print 'size: ', len(prediction)
                 index = StructureModel.sample(prediction[0], 2.0)
+
                 result = int_to_tag[index]
-                seq_in = [int_to_tag[value] for value in pattern]
-                sys.stdout.write(result)
-                sys.stdout.write(" ")
+                w_p_list = w.word_tokenize(" ".join(word_pattern))
+                word_window = w_p_list[len(pattern) - 5: len(pattern)]
+                word_window = [int_to_word[value] for value in word_window]
+                StructureModel.find_nearest_word(word2vec, word_window, result, structure)
+                # sys.stdout.write(result)
+                # sys.stdout.write(" ")
                 rs.append(index)
                 pattern.append(index)
                 pattern = pattern[1:len(pattern)]
             print "\nDone."
 
     # def words_model(self, struct):
+    @classmethod
+    def find_nearest_word(cls, word2vec, word_window, tag, structure):
+        value_list = structure.tags[tag]
+        comparison = dict()
+        for new_word in value_list:
+            temp = 0
+            for window in word_window:
+                temp += word2vec.model.similarity(new_word, window)
+            temp /= len(word_window)
+            comparison[new_word] = temp
+        sorted_comparison = sorted(comparison.items(), key=operator.itemgetter(1))
+        type(sorted_comparison)
 
     @classmethod
     def sample(cls, preds, temperature=1.0):
@@ -130,6 +157,5 @@ class StructureModel:
     @classmethod
     def semantic_model(cls, structure):
         semantic_model = sv.SemanticVector(structure)
-
+        semantic_model.model_word2vec()
         return semantic_model
-
