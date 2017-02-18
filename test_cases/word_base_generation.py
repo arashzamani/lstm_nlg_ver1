@@ -12,7 +12,7 @@ from hazm import *
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 print('Started...')
-myfile = UFile('/home/arash/Downloads/test1.txt')
+myfile = UFile('bbc.txt')
 
 print 'Reading text file'
 struct = structure.Structure(myfile.text)
@@ -28,7 +28,7 @@ Sentences = struct.prepare_list_of_words_in_sentences()
 
 print 'start modeling'
 # model = gensim.models.Word2Vec(Sentences, size=100, window=15, min_count=15, workers=4, sample=0.01)
-model = gensim.models.Word2Vec.load('/home/arash/PycharmProjects/lstm_nlg_ver1/weights.02.11.hdf5')
+model = gensim.models.Word2Vec.load('weights.02.11.hdf5')
 # model = gensim.models.Word2Vec(Sentences, min_count=1)
 #
 # model.save('model_bbc_30_12')
@@ -74,7 +74,7 @@ model_word_vector = np.array(temp_point, dtype='f')
 
 topn = 20
 most_similar_words = model.most_similar([model_word_vector], [], topn)
-tagger = POSTagger(model='/home/arash/PycharmProjects/lstm_nlg_ver1/resources/postagger.model')
+tagger = POSTagger(model='resources/postagger.model')
 
 for item in most_similar_words:
     temp = tagger.tag(item[0])

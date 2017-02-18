@@ -24,8 +24,8 @@ class Structure:
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)
         logging.log(logging.INFO, "Structure initialized")
         self.text = text
-        self.tagger = POSTagger(model='/home/arash/PycharmProjects/lstm_nlg_ver1/resources/postagger.model')
-        self.chunker = Chunker(model='/home/arash/PycharmProjects/lstm_nlg_ver1/resources/chunker.model')
+        self.tagger = POSTagger(model='resources/postagger.model')
+        self.chunker = Chunker(model='resources/chunker.model')
         self.prepare_sentences()
 
     # def __iter__(self):
