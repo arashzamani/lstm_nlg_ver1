@@ -11,7 +11,9 @@ import test_cases.algorithm2 as al2
 
 def main():
     print('Started...')
-    myfile = UFile('/home/arash/Downloads/test1.txt')
+    #myfile = UFile('bbc_shortened.txt')
+    myfile = UFile('bbc.txt')
+    #myfile = open('~/Arash_z/lstm_nlg_ver1/bbc_shortened.txt', 'rb')
     # model = sg.StructureModel(myfile)
     # model.model()
 
