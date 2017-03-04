@@ -13,8 +13,9 @@ import test_cases.algorithm3 as al3
 def main():
     print('Started...')
     #myfile = UFile('bbc_shortened.txt')
+    #myfile = UFile('shams.txt')
     myfile = UFile('bbc.txt')
-    #myfile = open('~/Arash_z/lstm_nlg_ver1/bbc_shortened.txt', 'rb')
+    #myfile = UFile('hafez.txt')
     # model = sg.StructureModel(myfile)
     # model.model()
 

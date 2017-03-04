@@ -12,13 +12,13 @@ from keras.models import Sequential
 from keras.utils import np_utils
 
 # load ascii text and covert to lowercase
-f = codecs.open("/home/arash/Downloads/test1.txt", 'r', encoding='utf8')
+f = codecs.open("../hafez.txt", 'r', encoding='utf8')
 raw_text = f.read()
 C = Counter(raw_text)
 C = sorted([[c, C[c]] for c in C], key=lambda x: x[1], reverse=True)
 st = set([c[0] for c in C if c[1] > 1])
 print st
-raw_text = [d for d in raw_text if d in st][0:200000]
+raw_text = [d for d in raw_text if d in st]#[0:200000]
 
 # create mapping of unique chars to integers, and a reverse mapping
 chars = sorted(list(set(raw_text)))
