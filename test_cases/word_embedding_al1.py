@@ -225,19 +225,25 @@ class StructureModel:
         nn = 64
 
         tag_model.add(GRU(nn * 4, return_sequences=True, input_shape=(X.shape[1], X.shape[2])))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
 
         tag_model.add(GRU(nn * 3, return_sequences=True))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
+
+        tag_model.add(GRU(nn * 3, return_sequences=True))
+        tag_model.add(Dropout(0.01))
+
+        tag_model.add(GRU(nn * 3, return_sequences=True))
+        tag_model.add(Dropout(0.01))
 
         tag_model.add(GRU(nn * 2, return_sequences=True))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
 
         tag_model.add(GRU(nn * 1, return_sequences=False))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
 
         tag_model.add(Dense(y.shape[1], activation='sigmoid'))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
 
         # # load the network weights
         tag_model.compile(loss='categorical_crossentropy', optimizer='rmsprop')

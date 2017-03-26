@@ -9,6 +9,7 @@ import test_cases.algorithm1 as al1
 import test_cases.algorithm2 as al2
 import test_cases.algorithm3 as al3
 import test_cases.word_embedding_al1 as we 
+import test_cases.algorithm2_with_embedding as al2we
 
 def main():
     print('Started...')
@@ -20,7 +21,8 @@ def main():
     # model.model()
 
     #al = al3.StructureModel(myfile)
-    al = we.StructureModel(myfile)
+    #al = al2.StructureModel(myfile)
+    al = al2we.StructureModel(myfile)
     al.model()
     # struct = structure.Structure(myfile.text)
     # # struct.generate_chunks_dict()
