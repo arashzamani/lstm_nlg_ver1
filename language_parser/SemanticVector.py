@@ -13,7 +13,7 @@ class SemanticVector:
         sentences = self.structure.prepare_list_of_words_in_sentences()
 
         print 'start modeling'
-        self.model = gensim.models.Word2Vec(sentences, size=size, window=window, min_count=min_count, workers=4, sample=0.01)
+        self.model = gensim.models.Word2Vec(sentences, size=size, window=window, min_count=min_count, workers=4, sample=0.001, sg=0)
 
         return self.model
 
