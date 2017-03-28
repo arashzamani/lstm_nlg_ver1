@@ -16,9 +16,9 @@ def main():
     #myfile = UFile('bbc_shortened.txt')
     #myfile = UFile('shams.txt')
     #myfile = UFile('masnavi2.txt')
+    myfile = UFile('baba_taher.txt')
     #myfile = UFile('bbc.txt')
-
-    myfile = UFile('hafez.txt')
+    #myfile = UFile('hafez.txt')
     # model = sg.StructureModel(myfile)
     # model.model()
 

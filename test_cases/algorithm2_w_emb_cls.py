@@ -83,8 +83,8 @@ class StructureModel:
 	#word_model.add(Convolution1D(nb_filter=32*2, filter_length=3, border_mode='same', activation='relu'))
         #word_model.add(MaxPooling1D(pool_length=3))	
 
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
+        #word_model.add(LSTM(32*3, return_sequences=True))
+        #word_model.add(Dropout(0.05))
 
 	#word_model.add(Convolution1D(nb_filter=32*2, filter_length=3, border_mode='same', activation='relu'))
         #word_model.add(MaxPooling1D(pool_length=2))
@@ -92,8 +92,8 @@ class StructureModel:
 	word_model.add(LSTM(32*3*3, return_sequences=True))
         word_model.add(Dropout(0.01))
 	
-	word_model.add(LSTM(32*3*3, return_sequences=True))
-        word_model.add(Dropout(0.01))
+	#word_model.add(LSTM(32*3*3, return_sequences=True))
+        #word_model.add(Dropout(0.01))
 	
 	word_model.add(Convolution1D(nb_filter=32*2, filter_length=3, border_mode='same', activation='relu'))
         word_model.add(MaxPooling1D(pool_length=3))
@@ -101,6 +101,7 @@ class StructureModel:
         word_model.add(LSTM(32*3, return_sequences=True))
         word_model.add(Dropout(0.05))
 
+	"""
         word_model.add(LSTM(32*3, return_sequences=True))
         word_model.add(Dropout(0.05))
 
@@ -109,6 +110,48 @@ class StructureModel:
 
         word_model.add(LSTM(32*3, return_sequences=True))
         word_model.add(Dropout(0.05))
+
+
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+        word_model.add(LSTM(32*3, return_sequences=True))
+        word_model.add(Dropout(0.05))
+
+	"""
+
+
 
         word_model.add(LSTM(nn * 5, return_sequences=False))
         word_model.add(Dropout(0.05))
