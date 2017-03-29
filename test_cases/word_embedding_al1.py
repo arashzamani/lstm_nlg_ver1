@@ -1,5 +1,4 @@
 import collections
-
 import operator
 import numpy
 import random
@@ -9,11 +8,11 @@ from keras.layers.recurrent import GRU
 from keras.models import Sequential
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras.utils import np_utils
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+#from sklearn.preprocessing import MinMaxScaler
+#from sklearn.model_selection import cross_val_score
+#from sklearn.model_selection import KFold
+#from sklearn.preprocessing import StandardScaler
+#from sklearn.pipeline import Pipeline
 
 import language_parser.SemanticVector as sv
 import language_parser.Structure as structure
@@ -26,7 +25,7 @@ class StructureModel:
 
     def model(self):
         struct = structure.Structure(self.file.text)
-        seq_length = 15
+        seq_length = 7
         word_list = struct.prepare_pure_list_of_words()
         # compute the vocabulary size
         vocabulary = sorted(list(set(word_list)))
@@ -55,16 +54,18 @@ class StructureModel:
         dataX = []
         dataY = list()
         n_words_in_text = len(word_list)
+	for t in structure.sentences_obj:
+            for i in range(0, t.sentence_len - seq_length, 1):
 
-        for i in range(0, n_words_in_text - seq_length, 1):
-            seq_in = word_list[i:i + seq_length]
-            seq_out = word_list[i + seq_length]
-            dataX.append([word_to_int[word] for word in seq_in])
-            if seq_out not in word2vec.wv.vocab:
-                dataY.append(non_word2vec_list)
-            else:
-                dataY.append(word2vec[seq_out])
-        n_patterns = len(dataX)
+		seq_in = t.words[i:i + seq_length]
+            	seq_out = t.words[i + seq_length]
+	        dataX.append([word_to_int[word] for word in seq_in])
+		if seq_out not in word2vec.wv.vocab:
+                    dataY.append(non_word2vec_list)
+                else:
+                    dataY.append(word2vec[seq_out])
+
+	n_patterns = len(dataX)
 
         # reshape X to be [samples, time steps, features]
         X = numpy.reshape(dataX, (n_patterns, seq_length, 1))
@@ -93,9 +94,9 @@ class StructureModel:
 
         # word_model.fit(X, y, nb_epoch=5, batch_size=512)
         # testing
-        for rn in range(2):
+        for rn in range(100):
             print rn
-            tag_model.fit(tag_X, tag_y, nb_epoch=1, batch_size=32)
+            tag_model.fit(tag_X, tag_y, nb_epoch=10, batch_size=512)
             # pick a random seed
             start = numpy.random.randint(0, len(dataX) - 1)
             tag_pattern = tag_dataX[start]
@@ -222,25 +223,31 @@ class StructureModel:
         print y.shape
         # define the LSTM model
         tag_model = Sequential()
-        nn = 16
+        nn = 64
 
         tag_model.add(GRU(nn * 4, return_sequences=True, input_shape=(X.shape[1], X.shape[2])))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
 
         tag_model.add(GRU(nn * 3, return_sequences=True))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
+
+        tag_model.add(GRU(nn * 3, return_sequences=True))
+        tag_model.add(Dropout(0.01))
+
+        tag_model.add(GRU(nn * 3, return_sequences=True))
+        tag_model.add(Dropout(0.01))
 
         tag_model.add(GRU(nn * 2, return_sequences=True))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
 
         tag_model.add(GRU(nn * 1, return_sequences=False))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
 
         tag_model.add(Dense(y.shape[1], activation='sigmoid'))
-        tag_model.add(Dropout(0.02))
+        tag_model.add(Dropout(0.01))
 
         # # load the network weights
-        tag_model.compile(loss='categorical_crossentropy', optimizer='adam')
+        tag_model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
         return tag_model, tag_to_int, int_to_tag, X, y, dataX, tags_dict
 
     @classmethod
@@ -260,3 +267,4 @@ class StructureModel:
         probs = numpy.array([v[1] for v in id_probs]) / sum([v[1] for v in id_probs])
 
         return numpy.random.choice(ids, p=probs)
+
