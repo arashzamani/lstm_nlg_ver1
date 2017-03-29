@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import gensim, logging
+from utility.constants import *
 
 
 class SemanticVector:
@@ -13,7 +14,7 @@ class SemanticVector:
         sentences = self.structure.prepare_list_of_words_in_sentences()
 
         print 'start modeling'
-        self.model = gensim.models.Word2Vec(sentences, size=100, window=window, min_count=min_count, workers=4,
+        self.model = gensim.models.Word2Vec(sentences, size=embedding_dim, window=window, min_count=min_count, workers=4,
                                             sample=0.01)
 
         return self.model
