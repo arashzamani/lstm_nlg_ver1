@@ -1,5 +1,5 @@
 import collections
-
+from keras.models import load_model
 import operator
 import numpy
 import sys
@@ -32,14 +32,14 @@ class StructureModel:
         # semantic modeling
         semantic = StructureModel.semantic_model(struct, seq_length)
 
-        StructureModel.word_model(struct, seq_length, semantic.model, word_list, vocabulary, vocab_lenght)
+        StructureModel.word_model(struct, seq_length, semantic.model, word_list, vocabulary, vocab_lenght, self.file)
 
     @classmethod
-    def word_model(cls, structure, seq_length, word2vec, word_list, vocabulary, vocab_length):
+    def word_model(cls, structure, seq_length, word2vec, word_list, vocabulary, vocab_length, file=None):
         total = 0
         for t in structure.sentences_obj:
             total += t.sentence_len
-
+	print file
         avg = total / len(structure.sentences_obj)
         print "average length of sentence", avg
 
@@ -80,20 +80,8 @@ class StructureModel:
         word_model.add(LSTM(32*3, return_sequences=True))
         word_model.add(Dropout(0.05))
 
-	#word_model.add(Convolution1D(nb_filter=32*2, filter_length=3, border_mode='same', activation='relu'))
-        #word_model.add(MaxPooling1D(pool_length=3))	
-
-        #word_model.add(LSTM(32*3, return_sequences=True))
-        #word_model.add(Dropout(0.05))
-
-	#word_model.add(Convolution1D(nb_filter=32*2, filter_length=3, border_mode='same', activation='relu'))
-        #word_model.add(MaxPooling1D(pool_length=2))
-
 	word_model.add(LSTM(32*3*3, return_sequences=True))
         word_model.add(Dropout(0.01))
-	
-	#word_model.add(LSTM(32*3*3, return_sequences=True))
-        #word_model.add(Dropout(0.01))
 	
 	word_model.add(Convolution1D(nb_filter=32*2, filter_length=3, border_mode='same', activation='relu'))
         word_model.add(MaxPooling1D(pool_length=3))
@@ -101,73 +89,24 @@ class StructureModel:
         word_model.add(LSTM(32*3, return_sequences=True))
         word_model.add(Dropout(0.05))
 
-	"""
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-        word_model.add(LSTM(32*3, return_sequences=True))
-        word_model.add(Dropout(0.05))
-
-	"""
-
-
-
         word_model.add(LSTM(nn * 5, return_sequences=False))
         word_model.add(Dropout(0.05))
 
         word_model.add(Dense(y.shape[1], activation='softmax'))
         
 	print word_model.summary()
+		
+	word_model.load_weights('model_for_hafez.h5')        
         
-	# load the network weights
-        word_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+	word_model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
         # testing
         for rn in range(10000):
             print rn
-            word_model.fit(X, y, nb_epoch=20, batch_size=512)  # , callbacks=callbacks_list)
-            # pick a random seed
+            word_model.fit(X, y, nb_epoch=1, batch_size=512)  # , callbacks=callbacks_list)
+            word_model.save('model_for_hafez.h5')
+	    #continue
+	    # pick a random seed
 	    start = numpy.random.randint(0, len(dataX) - 1)
             pattern = dataX[start] #dataX
 	    print "Seed:"
@@ -185,7 +124,7 @@ class StructureModel:
 		pattern.append(argm)
                 pattern = pattern[1:len(pattern)]
             print "\nDone."
-
+	     
     @classmethod
     def find_nearest_words(cls, word2vec, prediction_vec):
         model_word_vector = numpy.array(prediction_vec[0], dtype='f')
