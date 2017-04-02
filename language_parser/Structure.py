@@ -24,8 +24,8 @@ class Structure:
         logging.basicConfig(stream=sys.stdout, level=logging.INFO)
         logging.log(logging.INFO, "Structure initialized")
         self.text = text
-        self.tagger = POSTagger(model='resources/postagger.model')
-        self.chunker = Chunker(model='resources/chunker.model')
+        self.tagger = POSTagger(model='/home/arash/PycharmProjects/lstm_nlg_ver1/resources/postagger.model')
+        self.chunker = Chunker(model='/home/arash/PycharmProjects/lstm_nlg_ver1/resources/chunker.model')
         self.prepare_sentences()
 
     # def __iter__(self):
@@ -35,13 +35,14 @@ class Structure:
     def prepare_sentences(self):
         self.sentences = Sentence.Sentence.parse_sentences(self.text)
         print "sentences detected: ", len(self.sentences)
-        self.sentences_obj = [Sentence.Sentence(sentence) for sentence in self.sentences]
+        self.sentences_obj = [Sentence.Sentence(sentence, self.tagger, self.chunker) for sentence in self.sentences]
         print "number of sentences", len(self.sentences_obj)
 
     def prepare_list_of_words_in_sentences(self):
         if len(self.words_in_sentences) == 0:
             # stop_list = wordC.Word.get__stop_words()
-            self.words_in_sentences = [[word for word in word_tokenize(sentence) if word not in w.specials] for sentence in self.sentences]
+            self.words_in_sentences = [[word for word in word_tokenize(sentence) if word not in w.specials] for sentence
+                                       in self.sentences]
         return self.words_in_sentences
 
     def prepare_pure_list_of_words(self):
@@ -80,7 +81,8 @@ class Structure:
                     self.chunks[key] = temp_chunks[key]
 
 
-   ###################################################
+                    ###################################################
+
     # this function parse usable words of sentence
     # def sentence_to_u_word(self, sentence):
 
@@ -89,6 +91,12 @@ class Structure:
     def parse_tags(self, sentence):
         self.sentence_tags = self.tagger.tag(sentence.words)
         return self.sentence_tags
+
+    ###################################################
+    # parse sentence based on tags
+    def public_parse_tags(self, words):
+        tags = self.tagger.tag(words)
+        return tags
 
     ###################################################
     # return the dict of tags of this sentence

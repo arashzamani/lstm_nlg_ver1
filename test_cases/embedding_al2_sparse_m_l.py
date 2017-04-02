@@ -1,9 +1,9 @@
-import collections
 import sys
 
 from keras.layers import Embedding, LSTM, Dropout, Dense, Conv1D, MaxPooling1D, Merge
 from keras.models import Sequential
 
+import language_parser.Structure as structure
 from language_parser.prepare_data import *
 from utility.UFile import *
 
@@ -15,9 +15,9 @@ def get_model():
     structure_obj = structure.Structure(txt_file.text)
     word_list = structure_obj.prepare_pure_list_of_words()
     word_list.append(unknown)
-    structure_obj.generate_tags_dict()
     vocabulary = sorted(list(set(word_list)))
     word_to_int, int_to_word = equivalent_word_to_int(vocabulary)
+    structure_obj.generate_tags_dict()
     tags_dict = collections.OrderedDict(sorted(structure_obj.tags.items()))
     tag_to_int, int_to_tag = equivalent_tag_to_int(tags_dict)
     semantic_vector_obj = sv.SemanticVector(structure_obj)
@@ -27,20 +27,22 @@ def get_model():
 
     nb_classes = len(vocabulary)
     model = modeling(embedding_matrix, len(word_list), 0.05, nb_classes)
+
+    print len(word2vec.wv.vocab)
     train_X, train_y = prepare_multi_layer_train_sequence(tag_to_int, word_to_int, word_list,
-                                                          structure_obj.sentences_obj, len(vocabulary), is_sparse=False)
+                                                          structure_obj.sentences_obj, len(vocabulary), is_sparse=True)
     test_X = prepare_test_sequences(tag_to_int, word_to_int)
     train_model(model, train_X, train_y, 1, 128, int_to_word, test_X, structure_obj, tag_to_int)
 
 
 def train_model(model, train_X, train_y, nb_epoch, batch_size, int_to_word, test_X, structure_obj, tag_to_int):
-    if os.path.exists(os.getcwd()+word_2_vec_filename_embedding_al2):
+    if os.path.exists(os.getcwd() + word_2_vec_filename_embedding_al2_sparse_m_l):
         print "Loading Weights..."
-        model.load_weights(os.getcwd() + word_2_vec_filename_embedding_al2)
+        model.load_weights(os.getcwd() + word_2_vec_filename_embedding_al2_sparse_m_l)
     for rn in range(100):
         print rn
         model.fit(train_X, train_y, epochs=nb_epoch, batch_size=batch_size)  # , callbacks=callbacks_list)
-        model.save(os.getcwd() + word_2_vec_filename_embedding_al2)
+        model.save(os.getcwd() + word_2_vec_filename_embedding_al2_sparse_m_l)
         # pick a random seed
         start = np.random.randint(0, len(test_X[0]) - 1)
         test_tag_list = [(test_X[0][start])]
@@ -88,22 +90,27 @@ def modeling(embedding_matrix, nb_words, dropout_rate, nb_classes):
     merged_model = Sequential()
     print "final model merging..."
     merged_model.add(Merge([t_model, word_model], mode='concat'))
-    merged_model.add(LSTM(units=512 * 4, return_sequences=True))
-    merged_model.add(Conv1D(activation="relu", padding="same", filters=64 * 9, kernel_size=3))
+    merged_model.add(Conv1D(activation="relu", padding="same", filters=32 * 9, kernel_size=3))
     merged_model.add(MaxPooling1D(pool_size=3))
-    merged_model.add(Dropout(dropout_rate))
+
     merged_model.add(LSTM(128 * 3 * 3, return_sequences=True))
+    merged_model.add(Dropout(dropout_rate))
+
+    merged_model.add(LSTM(128 * 3, return_sequences=True))
     merged_model.add(Dropout(dropout_rate / 5))
 
-    merged_model.add(Conv1D(filters=64 * 9, kernel_size=3, padding='same', activation='relu'))
+    merged_model.add(Conv1D(filters=32 * 2, kernel_size=3, padding='same', activation='relu'))
     merged_model.add(MaxPooling1D(pool_size=3))
 
-    merged_model.add(LSTM(32 * 3 * 3 * 3, return_sequences=False))
+    word_model.add(LSTM(32 * 3 * 3 * 3, return_sequences=True))
+    word_model.add(Dropout(dropout_rate))
+
+    merged_model.add(LSTM(units=512 * 4, return_sequences=False))
     merged_model.add(Dropout(dropout_rate))
     merged_model.add(Dense(512 * 4, activation='tanh'))
     merged_model.add(Dropout(dropout_rate))
     merged_model.add(Dense(nb_classes, activation='softmax'))
-    merged_model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
+    merged_model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy',
                          metrics=['accuracy'])
     print merged_model.summary()
     return merged_model
@@ -136,16 +143,6 @@ def word2vec_model(embedding_matrix, nb_words, dropout_rate, nb_classes):
     return model
 
 
-# def sample(preds, temperature=1.0):
-#     # helper function to sample an index from a probability array
-#     # preds = np.asarray(preds).astype('float64')
-#
-#     id_probs = sorted(enumerate(preds), key=lambda x: x[1], reverse=True)[0:5]
-#     ids = [v[0] for v in id_probs]
-#     probs = np.array([v[1] for v in id_probs]) / sum([v[1] for v in id_probs])
-#
-#     return np.random.choice(ids, p=probs)
-
 def sample(preds, temperature=1.0):
     # helper function to sample an index from a probability array
     preds = np.asarray(preds).astype('float64')
@@ -164,6 +161,6 @@ def find_nearest_words(word2vec, prediction_vec):
     return most_similar_words[0]
 
 
-def start_embedding_al2():
+def start_embedding_al2_sparse_m_l():
     print "Starting..."
     get_model()
