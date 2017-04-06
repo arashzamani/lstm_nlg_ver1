@@ -1,5 +1,6 @@
 import test_cases.algorithm2_w_emb_cls as al2wecls
 import test_cases.algorithm3_w_emb_cls as al3wecls
+import test_cases.algorithm3_w_emb_cls_sparse as al3weclssparse
 from test_cases.embedding_al2 import *
 from test_cases.embedding_al2_sparse import *
 from test_cases.embedding_al2_sparse_m_l import *
@@ -31,6 +32,9 @@ def main(algorithm_no, text_file_no):
         start_embedding_al2_sparse()
     elif algorithm_no == 5:
         start_embedding_al2_sparse_m_l()
+    elif algorithm_no == 6:
+	al = al3weclssparse.StructureModel(myfile)
+	al.model()
 
 
-main(3, 1)
+main(6, 3) 

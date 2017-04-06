@@ -47,7 +47,7 @@ class StructureModel:
 
         word_to_int = dict((c, i) for i, c in enumerate(vocabulary))
         int_to_word = dict((i, c) for i, c in enumerate(vocabulary))
-
+	print vocab_length, len(word_list)
         dataX = []
         dataY = numpy.zeros((len(word_list) - seq_length, vocab_length))
         for i in range(0, len(word_list) - seq_length):
