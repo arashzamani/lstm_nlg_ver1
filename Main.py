@@ -33,8 +33,9 @@ def main(algorithm_no, text_file_no):
     elif algorithm_no == 5:
         start_embedding_al2_sparse_m_l()
     elif algorithm_no == 6:
-	al = al3weclssparse.StructureModel(myfile)
-	al.model()
+        al = al3weclssparse.StructureModel(myfile)
+        al.model()
 
 
-main(6, 3) 
+
+main(6, 1)
